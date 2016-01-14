@@ -15,6 +15,7 @@ exports.checkSession = function (req, res) {
 exports.isLogin = function (req, res, next) {
     var session = req.session.user_id;
     if (typeof session == 'undefined' || session == null) {
+        res.statusCode = 401;
         res.json(flag.FLAG_SESSION_FAIL_JSON);
     } else {
         next();
