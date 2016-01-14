@@ -12,7 +12,7 @@ if (process.env.NODE_ENV == 'development' || typeof process.env.NODE_ENV == 'und
     savepath = '/Users/MoonJR/Desktop/';
 } else {
     console.log('배포 모드로 서버를 시작합니다.');
-    savepath = '/root/SimpleMemoFiles/';
+    savepath = '/root/SimpleMemo/SimpleMemoFiles';
 }
 
 
