@@ -5,14 +5,14 @@ var pool = require('../manager/MysqlConnectionPool').mysqlPool;
 var fs = require('fs-extra');
 var flag = require('../manager/ErrorFlag');
 
-var savepath;
+var savePath = null;
 
 if (process.env.NODE_ENV == 'development' || typeof process.env.NODE_ENV == 'undefined') {
     console.log('개발자 모드로 서버를 시작합니다.');
-    savepath = '/Users/MoonJR/Desktop/';
+    savePath = '/Users/MoonJR/Desktop/';
 } else {
     console.log('배포 모드로 서버를 시작합니다.');
-    savepath = '/root/SimpleMemo/SimpleMemoFiles';
+    savePath = '/root/SimpleMemo/SimpleMemoFiles';
 }
 
 
@@ -40,7 +40,6 @@ exports.upload = function (req, res) {
                             console.log(err);
                             res.json(flag.FLAG_ERROR_JSON);
                         } else {
-                            console.log('success');
                             res.json(flag.FLAG_SUCCESS_JSON);
                         }
                         connection.release();
