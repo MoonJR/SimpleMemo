@@ -4,7 +4,17 @@
 var pool = require('../manager/MysqlConnectionPool').mysqlPool;
 var fs = require('fs-extra');
 var flag = require('../manager/ErrorFlag');
-const savePath = '/Users/MoonJR/Desktop/';
+
+var savepath;
+
+if (process.env.NODE_ENV == 'development' || typeof process.env.NODE_ENV == 'undefined') {
+    console.log('개발자 모드로 서버를 시작합니다.');
+    savepath = '/Users/MoonJR/Desktop/';
+} else {
+    console.log('배포 모드로 서버를 시작합니다.');
+    savepath = '/root/SimpleMemoFiles/';
+}
+
 
 exports.upload = function (req, res) {
     var user_id = req.session.user_id;
