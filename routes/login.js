@@ -48,12 +48,12 @@ exports.facebookLogin = function (req, res) {
         var token = req.query.token;
         var url = 'https://graph.facebook.com/me?fields=email,name&access_token=' + token;
 
-        https.get(url, function (res) {
+        https.get(url, function (result) {
             var body = '';
-            res.on('data', function (chunk) {
+            result.on('data', function (chunk) {
                 body += chunk;
             });
-            res.on('end', function () {
+            result.on('end', function () {
                 var fbResponse = JSON.parse(body);
                 var user_id = Number(fbResponse.id);
                 var email = fbResponse.email;
