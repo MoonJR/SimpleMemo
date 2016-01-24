@@ -7,7 +7,7 @@ var flag = require('../manager/ErrorFlag');
 
 var savePath = null;
 
-if (process.env.NODE_ENV == 'development' || typeof process.env.NODE_ENV == 'undefined') {
+if (process.env.NODE_ENV == 'development' || !process.env.NODE_ENV) {
     console.log('개발자 모드로 서버를 시작합니다.');
     savePath = '/Users/MoonJR/Desktop/';
 } else {
@@ -21,8 +21,8 @@ exports.upload = function (req, res) {
     var fileName = req.files.file.name;
 
     var tmpPath = req.files.file.path;
-    var targetPath = makePath(user_id, fileName);
     var reg_date = new Date().getTime();
+    var targetPath = makePath(user_id, reg_date);
 
     fs.move(tmpPath, targetPath, function (err) {
         if (err) {
@@ -49,9 +49,23 @@ exports.upload = function (req, res) {
         }
     })
 };
+
+var downloadDeadLine = 1000 * 60 * 60 * 24 * 7;//다운로드 가능기간 7일
+
 exports.download = function (req, res) {
     var user_id = req.session.user_id;
     var contentsId = Number(req.query.contents_id);
+    var nowDate = new Date().getTime();
+
+    var filePath = makePath(user_id, contentsId);
+
+    if (nowDate - contentsId > downloadDeadLine) {
+        res.json(flag.FLAG_FILE_DEADLINE_JSON);
+        return;
+    } else if (!fs.existsSync(filePath)) {
+        res.json(flag.FLAG_FILE_NOT_FOUND_JSON);
+        return;
+    }
 
     pool.getConnection(function (err, connection) {
         if (err) {
@@ -59,20 +73,23 @@ exports.download = function (req, res) {
             res.json(flag.FLAG_ERROR_JSON);
             connection.release();
         } else {
-            connection.query('SELECT contents FROM CONTENTS_DATA WHERE USER_ID=? AND CONTENTS_ID=?', [user_id, contentsId], function (err, result) {
+            connection.query('SELECT CONTENTS, CONTENTS_DOWNLOAD_COUNT FROM CONTENTS_DATA WHERE USER_ID=? AND CONTENTS_ID=?', [user_id, contentsId], function (err, result) {
                 if (err) {
                     console.log(err);
                     res.json(flag.FLAG_ERROR_JSON);
                 } else {
-                    console.log(result);
+                    //console.log(result);
                     if (result.length == 0) {
                         res.json(flag.FLAG_FILE_NOT_FOUND_JSON);
                     } else {
-                        var targetFile = makePath(user_id, result[0].contents);
-                        if (!fs.existsSync(targetFile)) {
-                            res.json(flag.FLAG_FILE_NOT_FOUND_JSON);
+                        if (result[0].CONTENTS_DOWNLOAD_COUNT > 30) {
+                            res.json(flag.FLAG_FILE_DOWNLOAD_OVER_JSON);
                         } else {
-                            res.download(targetFile);
+                            res.download(filePath, result[0].CONTENTS, function (err) {
+                                if (!err) {
+                                    downloadCountUp(user_id, contentsId);
+                                }
+                            });
                         }
                     }
                 }
@@ -82,7 +99,23 @@ exports.download = function (req, res) {
     });
 };
 
+var downloadCountUp = function (userId, contentsId) {
+    pool.getConnection(function (err, connection) {
+        if (err) {
+            console.log(err);
+            connection.release();
+        } else {
+            connection.query('UPDATE CONTENTS_DATA SET CONTENTS_DOWNLOAD_COUNT = CONTENTS_DOWNLOAD_COUNT + 1 WHERE USER_ID = ? AND CONTENTS_ID = ?', [userId, contentsId], function (err, result) {
+                if (err) {
+                    console.log(err);
+                }
+                connection.release();
+            });
+        }
+    });
+};
 
-var makePath = function (user_id, fileName) {
-    return savePath + user_id + '/' + fileName; //저장 경로
-}
+
+var makePath = function (user_id, reg_date) {
+    return savePath + user_id + '/' + reg_date; //저장 경로
+};
