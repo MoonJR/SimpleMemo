@@ -10,7 +10,7 @@ exports.login = function (req, res) {
     try {
         var email = req.query.email;
         var passwd = req.query.passwd;
-        if (typeof email == 'undefined') {
+        if (!email) {
             res.json(flag.FLAG_ERROR_JSON);
             return;
         }

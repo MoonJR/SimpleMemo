@@ -15,12 +15,13 @@ var multipartMiddleware = multipart({
 });
 
 /* GET home page. */
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
     res.render('index', {title: 'Express'});
 });
 
 router.get('/signup', signup.signUp, login.login);
 router.get('/login', login.login);
+router.get('/facebookLogin', login.facebookLogin);
 router.get('/checkSession', checkSession.checkSession);
 router.get('/logout', login.logout);
 router.get('/getContents', checkSession.isLogin, getContents.getContents);
