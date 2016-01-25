@@ -65,7 +65,7 @@ exports.facebookLogin = function (req, res) {
                         res.json(flag.FLAG_ERROR_JSON);
                         connection.release();
                     } else {
-                        connection.query('INSERT INTO USER VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE USER_EMAIL=?', [user_id, email, 'facebook', regDate, user_id], function (err, result) {
+                        connection.query('INSERT INTO USER VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE USER_EMAIL=?', [user_id, email, 'facebook', regDate, email], function (err, result) {
                             if (err) {
                                 console.log(err);
                                 res.json(flag.FLAG_ERROR_JSON);
