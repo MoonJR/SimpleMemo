@@ -12,7 +12,7 @@ exports.getContents = function (req, res) {
             res.json(flag.FLAG_ERROR_JSON);
             connection.release();
         } else {
-            connection.query('SELECT contents_id, contents, contents_type FROM CONTENTS_DATA WHERE USER_ID = ?', [user_id], function (err, result) {
+            connection.query('SELECT CONTENTS_DATA.contents_id, CONTENTS_DATA.contents,CONTENTS_DATA.contents_type, CONTENTS_SIMPLE_CODE.contents_simple_code, CONTENTS_SIMPLE_CODE.dead_line, CASE WHEN CONTENTS_SIMPLE_CODE.CONTENTS_PASSWD IS NULL THEN FALSE ELSE TRUE END is_passwd FROM CONTENTS_DATA LEFT OUTER JOIN CONTENTS_SIMPLE_CODE ON CONTENTS_DATA.CONTENTS_ID = CONTENTS_SIMPLE_CODE.CONTENTS_ID WHERE USER_ID = ?', [user_id], function (err, result) {
                 if (err) {
                     console.log(err);
                     res.json(flag.FLAG_ERROR_JSON);
