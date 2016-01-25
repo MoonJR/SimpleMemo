@@ -156,14 +156,75 @@ app.controller('contentsCtrl', function ($scope, $http, toastr) {
     $scope.login = {
         isLogin: false
     };
+    $scope.simpleCode = {
+        contents_id: '',
+        contents: '',
+        passwd: '',
+        deadLine: '',
+        isLoading: false,
+        isSecure: false
+    };
+    $scope.memo = {
+        contents: ''
+    };
     $scope.$on('login', function (event, args) {
         $scope.login.isLogin = args;
         if (args) {
             $scope.getContents();
         }
     });
-    $scope.memo = {
-        contents: ''
+    $scope.setSimpleCode = function (contents_id, contents) {
+        $scope.simpleCode.contents_id = contents_id;
+        $scope.simpleCode.contents = contents;
+        $scope.simpleCode.passwd = undefined;
+        $scope.simpleCode.isSecure = false;
+    };
+    $scope.makeSimpleCode = function () {
+
+        if ($scope.simpleCode.isSecure) {
+            if ($scope.simpleCode.passwd == '' || !$scope.simpleCode.passwd) {
+                toastr.error('비밀번호를 입력해주세요.', 'Error');
+                return;
+            }
+        }
+
+        $scope.simpleCode.isLoading = true;
+
+        $http.get("/makeSimpleCode?contents_id=" + $scope.simpleCode.contents_id + "&passwd=" + $scope.simpleCode.passwd + '&dead_line_code=' + $scope.simpleCode.deadLine)
+            .success(function (response) {
+                if (response.success_code != 2000) {
+                    toastr.error('서버 오류.', 'Error');
+                } else {
+                    toastr.info('code:' + $scope.formatSimpleCode(response.simple_code), '심플코드 생성 성공');
+                    angular.element(document.getElementById('myModal'))
+                        .removeClass('in');
+                }
+                $scope.simpleCode.isLoading = false;
+                $scope.getContents();
+            });
+    };
+    $scope.formatSimpleCode = function (simpleCode, isPasswd) {
+        if (simpleCode) {
+            var result = simpleCode.substr(0, 2) + '-' + simpleCode.substr(2);
+            if (isPasswd) {
+                return result + '*';
+            } else {
+                return result;
+            }
+
+        } else {
+            return '';
+        }
+    };
+    $scope.formatDeadLine = function (deadLine) {
+        var remainDate = deadLine - new Date().getTime();
+        if (remainDate <= 0) {
+            return '코드 활성 기간 종료';
+        } else {
+            var hour = Math.floor(remainDate / (1000 * 60 * 60));
+            var min = Math.floor((remainDate % (1000 * 60 * 60)) / (60 * 1000));
+            return hour + '시간 ' + min + '분 남았습니다.'
+        }
     };
     $scope.writeMemo = function () {
         if ($scope.memo.contents == '') {
@@ -183,6 +244,7 @@ app.controller('contentsCtrl', function ($scope, $http, toastr) {
     $scope.getContents = function () {
         $http.get("/getContents").success(function (response) {
             $scope.contents = response.contents;
+            console.log($scope.contents);
         });
     };
     $scope.isFile = function (type) {
