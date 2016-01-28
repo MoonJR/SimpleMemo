@@ -17,9 +17,10 @@ exports.getContents = function (req, res) {
                     console.log(err);
                     res.json(flag.FLAG_ERROR_JSON);
                 } else {
-                    var sendData = flag.FLAG_SUCCESS_JSON;
+                    var sendData = flag.FLAG_SUCCESS_JSON.constructor();
                     sendData.contents = result;
                     res.json(sendData);
+                    console.log(flag.FLAG_SUCCESS_JSON);
                 }
                 connection.release();
             });
