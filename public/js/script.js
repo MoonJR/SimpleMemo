@@ -15,6 +15,10 @@ app.controller('loginCtrl', function ($scope, $http, $rootScope, toastr) {
         passwdRepeat: '',
         isShowSignup: true
     };
+    $scope.simpleCode = {
+        code: '',
+        passwd: ''
+    };
     $scope.sendLogin = function () {
         if ($scope.login.email == '') {
             toastr.warning('이메일을 입력해 주세요.', 'Warning');
@@ -24,40 +28,42 @@ app.controller('loginCtrl', function ($scope, $http, $rootScope, toastr) {
             return;
         }
         $scope.login.isLoading = true;
-        $http.get(
-            "/login?email=" + $scope.login.email
-            + "&passwd=" + $scope.login.passwd).success(
-            function (response) {
-                if (response.success_code == 2000) {
-                    $scope.successLogin(true);
-                } else if (response.success_code = 3000) {
-                    toastr.error('로그인 실패\n정보를 확인해 주세요.', 'Error');
-                } else {
-                    toastr.error('서버 오류.', 'Error');
-                }
-                $scope.login.isLoading = false;
-            });
+
+        $http.post('/login', $scope.login).success(function (response) {
+            if (response.success_code == 2000) {
+                $scope.successLogin(true);
+            } else if (response.success_code = 3000) {
+                toastr.error('로그인 실패\n정보를 확인해 주세요.', 'Error');
+            } else {
+                toastr.error('서버 오류.', 'Error');
+            }
+            $scope.login.isLoading = false;
+        }).error(function () {
+            toastr.error('서버 오류.', 'Error');
+            $scope.login.isLoading = false;
+        });
     };
     $scope.sendFacebookLogin = function () {
         FB.login(function (response) {
             $scope.openDropdown();
             if (response.status === 'connected') {
                 $scope.login.isLoading = true;
-                $http.get(
-                    "/facebookLogin?token="
-                    + response.authResponse.accessToken).success(
-                    function (response) {
-                        if (response.success_code == 2000) {
-                            $scope.successLogin(true);
-                        } else if (response.success_code == 3001) {
-                            toastr.error(
-                                'Facebook 계정 정보 부족(이메일을 가져올 수 없습니다.',
-                                'Error');
-                        } else {
-                            toastr.error('서버 오류', 'Error');
-                        }
-                        $scope.login.isLoading = false;
-                    });
+                $http.post('/facebookLogin', {token: response.authResponse.accessToken}).success(function (response) {
+                    if (response.success_code == 2000) {
+                        $scope.successLogin(true);
+                    } else if (response.success_code == 3001) {
+                        toastr.error(
+                            'Facebook 계정 정보 부족(이메일을 가져올 수 없습니다.',
+                            'Error');
+                    } else {
+                        toastr.error('서버 오류', 'Error');
+                    }
+                    $scope.login.isLoading = false;
+                }).error(function () {
+                    toastr.error('서버 오류', 'Error');
+                    $scope.login.isLoading = false;
+                });
+
             }
         }, {
             scope: 'public_profile,email'
@@ -126,9 +132,8 @@ app.controller('loginCtrl', function ($scope, $http, $rootScope, toastr) {
             return;
         }
         $scope.login.isLoading = true;
-        $http.get(
-            "/signup?email=" + $scope.signup.email
-            + "&passwd=" + $scope.signup.passwd).success(
+        $http.post(
+            '/signup', $scope.signup).success(
             function (response) {
                 if (response.success_code == 2000) {
                     $scope.successLogin(true);
@@ -140,7 +145,10 @@ app.controller('loginCtrl', function ($scope, $http, $rootScope, toastr) {
                     toastr.error('서버 오류.', 'Error');
                 }
                 $scope.login.isLoading = false;
-            });
+            }).error(function () {
+            toastr.error('서버 오류.', 'Error');
+            $scope.login.isLoading = false;
+        });
     };
     $scope.successLogin = function (isLogin) {
         if (isLogin) {
@@ -151,6 +159,30 @@ app.controller('loginCtrl', function ($scope, $http, $rootScope, toastr) {
         $rootScope.$broadcast('login', isLogin);
 
     };
+    $scope.checkSimpleCode = function () {
+        $http.post(
+            '/checkSimpleCode', {simple_code: $scope.simpleCode.code}).success(
+            function (response) {
+                console.log(response);
+                if (response.success_code == 6003) {
+                    toastr.error('다운로드 코드가 존재하지 않습니다.', 'Error');
+                } else if (response.success_code == 6002) {
+                    toastr.error('다운로드 기간이 만료되었습니다.', 'Error');
+                } else if (response.success_code == 6005) {
+                    angular.element(document.getElementById('simpleDownloadOpenModal')).trigger('click');
+                } else if (response.success_code == 2000) {
+                    $scope.downloadFile();
+                }
+            }).error(function () {
+            toastr.error('서버 오류.', 'Error');
+        });
+    };
+    $scope.downloadFile = function () {
+        angular.element(document.getElementById('simpleDownloadModal')).removeClass('in');
+        location.href = '/downloadSimpleCode?simple_code=' + $scope.simpleCode.code + '&passwd=' + $scope.simpleCode.passwd;
+    }
+
+
 });
 app.controller('contentsCtrl', function ($scope, $http, toastr) {
     $scope.login = {
@@ -160,7 +192,7 @@ app.controller('contentsCtrl', function ($scope, $http, toastr) {
         contents_id: '',
         contents: '',
         passwd: '',
-        deadLine: '',
+        dead_line_code: '',
         isLoading: false,
         isSecure: false
     };
@@ -190,7 +222,7 @@ app.controller('contentsCtrl', function ($scope, $http, toastr) {
 
         $scope.simpleCode.isLoading = true;
 
-        $http.get("/makeSimpleCode?contents_id=" + $scope.simpleCode.contents_id + "&passwd=" + $scope.simpleCode.passwd + '&dead_line_code=' + $scope.simpleCode.deadLine)
+        $http.post('/makeSimpleCode', $scope.simpleCode)
             .success(function (response) {
                 if (response.success_code != 2000) {
                     toastr.error('서버 오류.', 'Error');
@@ -201,7 +233,11 @@ app.controller('contentsCtrl', function ($scope, $http, toastr) {
                 }
                 $scope.simpleCode.isLoading = false;
                 $scope.getContents();
-            });
+            }).error(function () {
+            toastr.error('서버 오류.', 'Error');
+            $scope.simpleCode.isLoading = false;
+            $scope.getContents();
+        });
     };
     $scope.formatSimpleCode = function (simpleCode, isPasswd) {
         if (simpleCode) {
@@ -231,7 +267,7 @@ app.controller('contentsCtrl', function ($scope, $http, toastr) {
             toastr.info('메모를 입력해 주세요.', 'Information');
             return;
         }
-        $http.get("/writeMemo?contents=" + $scope.memo.contents)
+        $http.post('/writeMemo', $scope.memo)
             .success(function (response) {
                 if (response.success_code != 2000) {
                     toastr.error('서버 오류.', 'Error');
@@ -239,7 +275,9 @@ app.controller('contentsCtrl', function ($scope, $http, toastr) {
                     $scope.memo.contents = '';
                 }
                 $scope.getContents();
-            });
+            }).error(function () {
+            toastr.error('서버 오류.', 'Error');
+        });
     };
     $scope.getContents = function () {
         $http.get("/getContents").success(function (response) {

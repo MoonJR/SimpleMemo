@@ -8,7 +8,7 @@ exports.writeMemo = function (req, res) {
 
     var user_id = req.session.user_id;
     var reg_date = new Date().getTime();
-    var contents = req.query.contents;
+    var contents = req.body.contents;
 
     pool.getConnection(function (err, connection) {
         if (err) {

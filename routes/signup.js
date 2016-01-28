@@ -7,8 +7,8 @@ var flag = require('../manager/ErrorFlag');
 
 exports.signUp = function (req, res, next) {
     try {
-        var email = req.query.email;
-        var passwd = req.query.passwd;
+        var email = req.body.email;
+        var passwd = req.body.passwd;
 
         if (!email) {
             res.json(flag.FLAG_ERROR_JSON);

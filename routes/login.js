@@ -8,8 +8,8 @@ var https = require('https');
 
 exports.login = function (req, res) {
     try {
-        var email = req.query.email;
-        var passwd = req.query.passwd;
+        var email = req.body.email;
+        var passwd = req.body.passwd;
         if (!email) {
             res.json(flag.FLAG_ERROR_JSON);
             return;
@@ -45,7 +45,7 @@ exports.login = function (req, res) {
 };
 exports.facebookLogin = function (req, res) {
     try {
-        var token = req.query.token;
+        var token = req.body.token;
         var url = 'https://graph.facebook.com/me?fields=email,name&access_token=' + token;
 
         https.get(url, function (result) {

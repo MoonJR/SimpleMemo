@@ -19,17 +19,17 @@ router.get('/', function (req, res) {
     res.render('index', {title: 'Express'});
 });
 
-router.get('/signup', signup.signUp, login.login);
-router.get('/login', login.login);
-router.get('/facebookLogin', login.facebookLogin);
+router.post('/signup', signup.signUp, login.login);
+router.post('/login', login.login);
+router.post('/facebookLogin', login.facebookLogin);
 router.get('/checkSession', checkSession.checkSession);
 router.get('/logout', login.logout);
 router.get('/getContents', checkSession.isLogin, getContents.getContents);
-router.get('/writeMemo', checkSession.isLogin, writeMemo.writeMemo);
+router.post('/writeMemo', checkSession.isLogin, writeMemo.writeMemo);
 router.post('/upload', checkSession.isLogin, multipartMiddleware, file.upload);
 router.get('/download', checkSession.isLogin, file.download);
-router.get('/makeSimpleCode', checkSession.isLogin, file.makeSimpleCode);
-router.get('/checkSimpleCode', file.checkSimpleCode);
+router.post('/makeSimpleCode', checkSession.isLogin, file.makeSimpleCode);
+router.post('/checkSimpleCode', file.checkSimpleCode);
 router.get('/downloadSimpleCode', file.downloadSimpleCode, file.download);
 
 module.exports = router;

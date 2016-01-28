@@ -101,14 +101,14 @@ exports.download = function (req, res) {
 };
 
 exports.makeSimpleCode = function (req, res) {
-    var contentsId = Number(req.query.contents_id);
-    var passwd = req.query.passwd;
+    var contentsId = Number(req.body.contents_id);
+    var passwd = req.body.passwd;
     if (passwd == 'undefined' || !passwd) {
         passwd = null;
     }
 
     var regDate = new Date().getTime();
-    var deadLine = makeDeadLine(regDate, Number(req.query.dead_line_code));
+    var deadLine = makeDeadLine(regDate, Number(req.body.dead_line_code));
     var simpleCode = makeRandomString() + makeRandomNumber();
 
     pool.getConnection(function (err, connection) {
@@ -134,7 +134,7 @@ exports.makeSimpleCode = function (req, res) {
     });
 };
 exports.checkSimpleCode = function (req, res) {
-    var simpleCode = req.query.simple_code.replace(/-/gi, '').toUpperCase();
+    var simpleCode = req.body.simple_code.replace(/-/gi, '').toUpperCase();
     var nowDate = new Date().getTime();
     pool.getConnection(function (err, connection) {
         if (err) {
@@ -172,7 +172,7 @@ exports.checkSimpleCode = function (req, res) {
 exports.downloadSimpleCode = function (req, res, next) {
     var simpleCode = req.query.simple_code.replace(/-/gi, '').toUpperCase();
     var passwd = req.query.passwd;
-    if (passwd == 'undefined' || !passwd) {
+    if (passwd == 'undefined' || !passwd || passwd == '') {
         passwd = null;
     }
     pool.getConnection(function (err, connection) {
