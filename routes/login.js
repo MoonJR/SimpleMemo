@@ -20,7 +20,6 @@ exports.login = function (req, res) {
             if (err) {
                 console.log(err);
                 res.json(flag.FLAG_ERROR_JSON);
-                connection.release();
             } else {
                 connection.query('SELECT REG_DATE FROM USER WHERE USER_ID = ? AND USER_PASSWD = ?', [user_id, passwd], function (err, result) {
                     if (err) {
@@ -63,7 +62,6 @@ exports.facebookLogin = function (req, res) {
                     if (err) {
                         console.log(err);
                         res.json(flag.FLAG_ERROR_JSON);
-                        connection.release();
                     } else {
                         connection.query('INSERT INTO USER VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE USER_EMAIL=?', [user_id, email, 'facebook', regDate, email], function (err, result) {
                             if (err) {

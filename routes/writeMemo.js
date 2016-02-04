@@ -14,7 +14,6 @@ exports.writeMemo = function (req, res) {
         if (err) {
             console.log(err);
             res.json(flag.FLAG_ERROR_JSON);
-            connection.release();
         } else {
             connection.query('INSERT INTO CONTENTS_DATA VALUES(?,?,?,?,?)', [user_id, reg_date, contents, flag.FLAG_CONTENTS_TYPE_STRING, 0], function (err, result) {
                 if (err) {

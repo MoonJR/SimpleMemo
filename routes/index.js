@@ -32,15 +32,4 @@ router.post('/makeSimpleCode', checkSession.isLogin, file.makeSimpleCode);
 router.post('/checkSimpleCode', file.checkSimpleCode);
 router.get('/downloadSimpleCode', file.downloadSimpleCode, file.download);
 
-var data = {
-    success_code: 123,
-    success_msg: '헬로',
-    contents: [
-        {title: '안녕하세요', title_id: 123},
-        {title: '안녕하세요', title_id: 123},
-        {title: '안녕하세요', title_id: 123},
-        {title: '안녕하세요', title_id: 123},
-        {title: '안녕하세요', title_id: 123}]
-};
-
 module.exports = router;

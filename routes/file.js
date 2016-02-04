@@ -33,7 +33,6 @@ exports.upload = function (req, res) {
                 if (err) {
                     console.log(err);
                     res.json(flag.FLAG_ERROR_JSON);
-                    connection.release();
                 } else {
                     connection.query('INSERT INTO CONTENTS_DATA VALUES(?,?,?,?,?)', [user_id, reg_date, fileName, flag.FLAG_CONTENTS_TYPE_FILE, 0], function (err, result) {
                         if (err) {
@@ -72,7 +71,6 @@ exports.download = function (req, res) {
         if (err) {
             console.log(err);
             res.json(flag.FLAG_ERROR_JSON);
-            connection.release();
         } else {
             connection.query('SELECT CONTENTS, CONTENTS_DOWNLOAD_COUNT FROM CONTENTS_DATA WHERE USER_ID=? AND CONTENTS_ID=?', [user_id, contentsId], function (err, result) {
                 if (err) {
@@ -115,7 +113,6 @@ exports.makeSimpleCode = function (req, res) {
         if (err) {
             console.log(err);
             res.json(flag.FLAG_ERROR_JSON);
-            connection.release();
         } else {
             connection.query('INSERT INTO CONTENTS_SIMPLE_CODE VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE CONTENTS_SIMPLE_CODE=? ,CONTENTS_PASSWD=?, REG_DATE=?, DEAD_LINE=? '
                 , [contentsId, simpleCode, passwd, regDate, deadLine, simpleCode, passwd, regDate, deadLine]
@@ -140,7 +137,6 @@ exports.checkSimpleCode = function (req, res) {
         if (err) {
             console.log(err);
             res.json(flag.FLAG_ERROR_JSON);
-            connection.release();
         } else {
             connection.query('SELECT CASE WHEN dead_line>? THEN TRUE ELSE FALSE END remain_dead_line, CASE WHEN contents_passwd IS NULL THEN FALSE ELSE TRUE END is_passwd FROM CONTENTS_SIMPLE_CODE WHERE CONTENTS_SIMPLE_CODE=?'
                 , [nowDate, simpleCode]
@@ -179,7 +175,6 @@ exports.downloadSimpleCode = function (req, res, next) {
         if (err) {
             console.log(err);
             res.json(flag.FLAG_ERROR_JSON);
-            connection.release();
         } else {
             connection.query('SELECT CONTENTS_DATA.user_id, CONTENTS_SIMPLE_CODE.contents_passwd, CONTENTS_SIMPLE_CODE.contents_id FROM CONTENTS_DATA, CONTENTS_SIMPLE_CODE WHERE CONTENTS_DATA.CONTENTS_ID=CONTENTS_SIMPLE_CODE.CONTENTS_ID AND CONTENTS_SIMPLE_CODE=?'
                 , [simpleCode]
@@ -216,7 +211,6 @@ var downloadCountUp = function (userId, contentsId) {
     pool.getConnection(function (err, connection) {
         if (err) {
             console.log(err);
-            connection.release();
         } else {
             connection.query('UPDATE CONTENTS_DATA SET CONTENTS_DOWNLOAD_COUNT = CONTENTS_DOWNLOAD_COUNT + 1 WHERE USER_ID = ? AND CONTENTS_ID = ?', [userId, contentsId], function (err, result) {
                 if (err) {

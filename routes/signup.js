@@ -22,7 +22,6 @@ exports.signUp = function (req, res, next) {
             if (err) {
                 console.log(err);
                 res.json(flag.FLAG_ERROR_JSON);
-                connection.release();
             } else {
                 connection.query('INSERT INTO USER VALUES(?,?,?,?)', [id, email, passwd, regDate], function (err, result) {
                     if (err) {
