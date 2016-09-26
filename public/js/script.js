@@ -305,8 +305,9 @@ Dropzone.options.dropzone = {
         });
     }
 };
+
 var _AceGID = (function () {
-    var Inf = ['gtp14.acecounter.com', '8080', 'AH5A40968768253', 'AW', '0', 'NaPm,Ncisy', 'ALL', '0'];
+    var Inf = ['gtp3.acecounter.com', '8080', 'AH6A40968868262', 'AW', '0', 'NaPm,Ncisy', 'ALL', '0'];
     var _CI = (!_AceGID) ? [] : _AceGID.val;
     var _N = 0;
     var _T = new Image(0, 0);
